@@ -27,7 +27,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install deps
-        run: pip install -e ".[dev]"
+        run: pip install -e ".[dev,dbt]"
       - name: Lint
         run: |
           ruff check src tests
@@ -36,3 +36,15 @@ jobs:
         run: pytest -v
         env:
           DATABASE_URL: postgresql+psycopg://dockwatch:dockwatch@localhost:5432/dockwatch
+      - name: Migrate
+        run: alembic upgrade head
+        env:
+          DATABASE_URL: postgresql+psycopg://dockwatch:dockwatch@localhost:5432/dockwatch
+      # dbt/profiles.yml's env_var() defaults (localhost/5432/dockwatch/dockwatch)
+      # already match the postgres service above, so no extra env vars needed here.
+      - name: dbt run
+        working-directory: dbt
+        run: dbt run --profiles-dir .
+      - name: dbt test
+        working-directory: dbt
+        run: dbt test --profiles-dir .
