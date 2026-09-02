@@ -1,0 +1,294 @@
+<title>Dockwatch</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F4F6F8; --surface:#FFFFFF; --ink:#141C26; --muted:#5E6B7A; --line:#D7DDE4;
+  --accent:#0E7C78; --accent-soft:#E1F1EF; --warn:#C2711A; --warn-soft:#FBEEDD;
+  --code-bg:#EDF1F4; --rail:#F9FAFB;
+  --display:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;
+  --body:"IBM Plex Sans","Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono",SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F151D; --surface:#161E29; --ink:#E6EBF0; --muted:#98A5B3; --line:#2A3542;
+    --accent:#3FBDB6; --accent-soft:#12302F; --warn:#E8A15A; --warn-soft:#3A2A16;
+    --code-bg:#1C2633; --rail:#121923;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F151D; --surface:#161E29; --ink:#E6EBF0; --muted:#98A5B3; --line:#2A3542;
+  --accent:#3FBDB6; --accent-soft:#12302F; --warn:#E8A15A; --warn-soft:#3A2A16;
+  --code-bg:#1C2633; --rail:#121923;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6}
+a{color:var(--accent)}
+.wrap{display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px;max-width:1080px;margin:0 auto;padding:40px 28px 96px}
+@media (max-width:820px){.wrap{grid-template-columns:1fr;gap:24px;padding:24px 18px 64px}.rail{position:static!important}}
+.rail{position:sticky;top:24px;align-self:start;font-size:13.5px}
+.rail .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.rail a{display:block;color:var(--muted);text-decoration:none;padding:5px 0 5px 12px;border-left:2px solid var(--line)}
+.rail a:hover,.rail a:focus-visible{color:var(--accent);border-color:var(--accent);outline:none}
+.rail .meta{margin-top:22px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;line-height:1.5}
+main{max-width:70ch}
+h1{font-family:var(--display);font-size:clamp(34px,5vw,50px);line-height:1.05;font-weight:700;letter-spacing:-.02em;margin:0 0 10px;text-wrap:balance}
+.sub{font-size:18px;color:var(--muted);margin:0 0 28px;text-wrap:balance}
+h2{font-family:var(--display);font-size:27px;font-weight:700;letter-spacing:-.015em;line-height:1.15;margin:56px 0 12px;text-wrap:balance}
+h3{font-family:var(--display);font-size:19px;font-weight:700;margin:30px 0 8px;text-wrap:balance}
+p{margin:0 0 14px}
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+code{font-family:var(--mono);font-size:.9em;background:var(--code-bg);padding:1px 5px;border-radius:3px}
+pre{font-family:var(--mono);font-size:13px;line-height:1.5;background:var(--code-bg);padding:14px 16px;border-radius:4px;overflow-x:auto;margin:0 0 16px}
+pre code{background:none;padding:0}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0 8px}
+@media (max-width:560px){.stats{grid-template-columns:1fr}}
+.stat{border-top:2px solid var(--accent);padding:10px 0 0}
+.stat b{font-family:var(--display);font-size:30px;font-weight:700;display:block;line-height:1;font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;color:var(--muted)}
+.callout{background:var(--accent-soft);border-left:3px solid var(--accent);padding:12px 16px;margin:18px 0;border-radius:0 4px 4px 0}
+.callout.warn{background:var(--warn-soft);border-color:var(--warn)}
+.callout p:last-child{margin:0}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:12px 0 18px}
+.tablewrap{overflow-x:auto;margin:0 0 8px}
+th,td{text-align:left;vertical-align:top;padding:9px 10px;border-bottom:1px solid var(--line)}
+th{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+td.k{font-weight:600;white-space:nowrap}
+.pill{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 7px;border-radius:3px;background:var(--code-bg);color:var(--ink);white-space:nowrap;margin:0 4px 4px 0}
+.pill.acc{background:var(--accent-soft);color:var(--accent)}
+.diagram{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px;margin:18px 0;overflow-x:auto}
+.diagram svg{display:block;min-width:640px;width:100%;height:auto}
+.diagram figcaption{font-size:13px;color:var(--muted);margin-top:8px}
+.phase{display:grid;grid-template-columns:96px 1fr;gap:14px;padding:14px 0;border-top:1px solid var(--line)}
+.phase:last-of-type{border-bottom:1px solid var(--line)}
+.phase .when{font-family:var(--mono);font-size:12.5px;color:var(--accent);padding-top:3px}
+.phase h4{margin:0 0 4px;font-family:var(--display);font-size:16.5px}
+.phase p{margin:0 0 6px;font-size:14.5px}
+.phase .ship{font-size:13px;color:var(--muted)}
+.alt{border:1px solid var(--line);border-radius:6px;padding:16px 18px;margin:0 0 14px;background:var(--surface)}
+.alt h3{margin:0 0 4px}
+.alt .src{font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:8px}
+.alt p{font-size:14.5px}
+.alt p:last-child{margin:0}
+ul{padding-left:20px;margin:0 0 14px}li{margin-bottom:5px}
+.bullets li{font-family:var(--mono);font-size:13px;line-height:1.55;margin-bottom:10px}
+.small{font-size:13.5px;color:var(--muted)}
+.sources{font-size:13px;color:var(--muted)}.sources li{margin-bottom:3px}
+</style>
+
+<div class="wrap">
+<nav class="rail">
+  <div class="eyebrow">Contents</div>
+  <a href="#why">What gets scored</a>
+  <a href="#flagship">Flagship: Dockwatch</a>
+  <a href="#arch">Architecture</a>
+  <a href="#coverage">Skill coverage</a>
+  <a href="#hard">The hard parts</a>
+  <a href="#plan">6-week plan</a>
+  <a href="#resume">Resume bullets</a>
+  <a href="#alts">Three alternatives</a>
+  <a href="#avoid">What to avoid</a>
+  <a href="#sources">Sources</a>
+  <div class="meta">Prepared for Bharath · 2 yrs SWE · Python stack · Sept 2026</div>
+</nav>
+
+<main>
+<p class="eyebrow">Portfolio project brief</p>
+<h1>Dockwatch: a real-time bike-share rebalancing platform</h1>
+<p class="sub">One project that exercises streaming, batch ETL, warehouse modelling, SQL at scale, a load-balanced API, caching, rate limiting, observability and cloud infra, built on live public data with a business problem an interviewer will instantly understand.</p>
+
+<div class="stats">
+  <div class="stat"><b>63%</b><span>of data-engineer postings ask for Python; 62% ask for SQL</span></div>
+  <div class="stat"><b>40%</b><span>of backend postings ask for Python; ~30% Docker, ~30% AWS, ~24% PostgreSQL</span></div>
+  <div class="stat"><b>5–10 min</b><span>is how long a hiring manager spends on a portfolio the first time</span></div>
+</div>
+
+<h2 id="why">What hiring managers actually score</h2>
+<p>Across the portfolio checklists and job-market reports I read, the same six things keep appearing: a real problem with a business reason to exist, data that is messy and large enough to be uncomfortable, a modern and recognisable tool stack, clean modular code with tests, a README that explains the problem and the results in the first screen, and a pipeline that runs end to end on a schedule without a human clicking anything. The most common failure is the inverse of that list: a clean Kaggle CSV, a notebook, no automation, no deployment, no numbers.</p>
+<p>The Qarera analysis of 360,000 postings adds two more signals worth designing around. Python plus SQL plus PostgreSQL plus Docker plus AWS is the intersection that appears in both backend and data-engineering listings, so a project built on exactly that stack is searchable by both kinds of recruiter. And "AI" is now the second most requested hard skill overall, so one small, well-scoped AI feature at the end of the project is worth more than it costs.</p>
+<div class="callout"><p><strong>The design rule for this project:</strong> every component has to be justified by the problem, not by the resume. "I added Kafka because the feed updates every 30 seconds and I need replay" is a great interview answer. "I added Kafka to show Kafka" is not.</p></div>
+
+<h2 id="flagship">The flagship: Dockwatch</h2>
+<p><strong>The problem.</strong> Bike-share operators (Citi Bike in New York, Divvy in Chicago, Bay Wheels in San Francisco) lose money every time a rider arrives at an empty dock or a full one. They pay crews to drive vans around moving bikes, a job called <em>rebalancing</em>. Deciding <em>which</em> stations will run empty in the next 30–60 minutes, and in what order to visit them, is a real operational question with real cost attached. That is the whole product: predict dock-outs before they happen, and hand the crew a ranked list.</p>
+<p><strong>Why this data.</strong> Every major bike-share system publishes a free, keyless, real-time feed in a standard called GBFS. <code>station_status.json</code> refreshes every 30–60 seconds with bikes and docks available at every station (New York alone has ~2,000 stations), and the specification requires it to be no more than five minutes stale. Separately, Citi Bike publishes monthly trip-history CSVs going back to 2013, with millions of rows per month, which gives you a large batch dataset for the warehouse side. Add Open-Meteo for weather (free, no key) because rain and temperature are the strongest predictors of demand. Three sources, zero API keys, zero cost, and a mix of live stream plus large historical batch. That mix is exactly what the checklists say they want to see.</p>
+<p><strong>What "done" looks like.</strong> A public URL where anyone can open a map, see every station coloured by predicted risk of running out in the next 30 minutes, hit an API for the rebalancing queue, and look at a Grafana dashboard showing request latency across three API replicas behind a load balancer while a load test is running. Plus a README with an architecture diagram and five measured numbers.</p>
+
+<h2 id="arch">Architecture</h2>
+<figure class="diagram">
+<svg viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Dockwatch architecture: sources feed Kafka and Airflow, land in Postgres and S3, are modelled by dbt, and are served by a load-balanced FastAPI tier with Redis, observed by Prometheus and Grafana">
+  <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker></defs>
+  <g font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--ink)">
+    <!-- column labels -->
+    <text x="60" y="22" fill="var(--muted)" letter-spacing="1.5">SOURCES</text>
+    <text x="250" y="22" fill="var(--muted)" letter-spacing="1.5">INGEST</text>
+    <text x="440" y="22" fill="var(--muted)" letter-spacing="1.5">STORE + MODEL</text>
+    <text x="680" y="22" fill="var(--muted)" letter-spacing="1.5">SERVE</text>
+
+    <!-- sources -->
+    <rect x="30" y="40" width="150" height="46" rx="4" fill="var(--surface)" stroke="var(--line)"/>
+    <text x="40" y="59" font-weight="500">GBFS station_status</text><text x="40" y="75" fill="var(--muted)">every 30–60 s · ~2k stations</text>
+    <rect x="30" y="104" width="150" height="46" rx="4" fill="var(--surface)" stroke="var(--line)"/>
+    <text x="40" y="123" font-weight="500">Open-Meteo weather</text><text x="40" y="139" fill="var(--muted)">hourly · no key</text>
+    <rect x="30" y="220" width="150" height="46" rx="4" fill="var(--surface)" stroke="var(--line)"/>
+    <text x="40" y="239" font-weight="500">Citi Bike trip CSVs</text><text x="40" y="255" fill="var(--muted)">monthly · millions of rows</text>
+
+    <!-- ingest -->
+    <rect x="230" y="40" width="150" height="110" rx="4" fill="var(--accent-soft)" stroke="var(--accent)"/>
+    <text x="240" y="59" font-weight="500" fill="var(--accent)">Poller → Kafka</text>
+    <text x="240" y="77">topic station.status</text>
+    <text x="240" y="92">key = station_id</text>
+    <text x="240" y="107">idempotent producer</text>
+    <text x="240" y="122" fill="var(--muted)">consumer: Faust /</text>
+    <text x="240" y="137" fill="var(--muted)">Spark Structured Streaming</text>
+
+    <rect x="230" y="220" width="150" height="70" rx="4" fill="var(--accent-soft)" stroke="var(--accent)"/>
+    <text x="240" y="239" font-weight="500" fill="var(--accent)">Airflow DAG (monthly)</text>
+    <text x="240" y="256">download → PySpark →</text>
+    <text x="240" y="271">Parquet on S3/MinIO</text>
+
+    <!-- store -->
+    <rect x="430" y="40" width="190" height="110" rx="4" fill="var(--surface)" stroke="var(--line)"/>
+    <text x="440" y="59" font-weight="500">PostgreSQL (+TimescaleDB)</text>
+    <text x="440" y="77">station_status_snapshots</text>
+    <text x="440" y="92" fill="var(--muted)">partitioned by day · BRIN</text>
+    <text x="440" y="107">stations · weather_hourly</text>
+    <text x="440" y="122">rebalance_tasks · outbox</text>
+    <text x="440" y="137" fill="var(--muted)">continuous aggregates</text>
+
+    <rect x="430" y="220" width="190" height="70" rx="4" fill="var(--surface)" stroke="var(--line)"/>
+    <text x="440" y="239" font-weight="500">dbt models + tests</text>
+    <text x="440" y="256">staging → intermediate →</text>
+    <text x="440" y="271">marts (station_hourly_demand)</text>
+
+    <!-- serve -->
+    <rect x="670" y="40" width="200" height="34" rx="4" fill="var(--surface)" stroke="var(--line)"/>
+    <text x="680" y="61" font-weight="500">Nginx · least_conn · health checks</text>
+    <rect x="670" y="90" width="60" height="30" rx="4" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="680" y="109" fill="var(--accent)">api ×1</text>
+    <rect x="740" y="90" width="60" height="30" rx="4" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="750" y="109" fill="var(--accent)">api ×2</text>
+    <rect x="810" y="90" width="60" height="30" rx="4" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="820" y="109" fill="var(--accent)">api ×3</text>
+    <text x="680" y="140" fill="var(--muted)">FastAPI · idempotency keys</text>
+    <text x="680" y="155" fill="var(--muted)">token-bucket rate limit</text>
+    <rect x="670" y="170" width="200" height="34" rx="4" fill="var(--surface)" stroke="var(--line)"/>
+    <text x="680" y="191" font-weight="500">Redis · cache · rate-limit counters</text>
+
+    <rect x="670" y="220" width="200" height="70" rx="4" fill="var(--surface)" stroke="var(--line)"/>
+    <text x="680" y="239" font-weight="500">Prediction worker</text>
+    <text x="680" y="256">features from marts → risk score</text>
+    <text x="680" y="271">writes rebalance_tasks + outbox</text>
+
+    <!-- observability band -->
+    <rect x="30" y="330" width="840" height="60" rx="4" fill="var(--rail)" stroke="var(--line)" stroke-dasharray="4 3"/>
+    <text x="40" y="350" fill="var(--muted)" letter-spacing="1.5">CROSS-CUTTING</text>
+    <text x="40" y="372">Prometheus + Grafana · OpenTelemetry traces · structured JSON logs · k6 load tests · GitHub Actions CI · Docker Compose → Terraform on AWS free tier</text>
+
+    <!-- arrows -->
+    <g stroke="var(--muted)" stroke-width="1.4" fill="none" marker-end="url(#ar)">
+      <path d="M180 63 H228"/>
+      <path d="M180 127 H228"/>
+      <path d="M180 243 H228"/>
+      <path d="M380 95 H428"/>
+      <path d="M380 255 H428"/>
+      <path d="M525 150 V218"/>
+      <path d="M620 95 H668"/>
+      <path d="M620 255 H668"/>
+      <path d="M770 120 V168"/>
+    </g>
+  </g>
+</svg>
+<figcaption>Live feed goes through Kafka into partitioned Postgres tables; monthly history goes through Airflow and PySpark into Parquet, then dbt models both into marts the prediction worker and API read. Three API replicas sit behind Nginx with Redis in front of the database.</figcaption>
+</figure>
+
+<h3>The data model, briefly</h3>
+<p>Four core tables carry the whole thing. <code>stations</code> is a slowly changing dimension (stations move and get renamed; keep history with <code>valid_from</code>/<code>valid_to</code>). <code>station_status_snapshots</code> is the big one: one row per station per poll, about 2,000 × 2 per minute ≈ 5.8 million rows a day in New York, which is exactly the size where naive queries stop working and you get to demonstrate partitioning, BRIN indexes and <code>EXPLAIN ANALYZE</code>. <code>trips</code> holds the historical CSVs (tens of millions of rows after a few months). <code>rebalance_tasks</code> is the write side of the API, with an <code>outbox</code> table next to it so task creation and the Kafka event are committed in the same transaction.</p>
+<pre><code>-- The query that justifies the whole warehouse:
+-- for each station, minutes until empty at the current drain rate
+WITH recent AS (
+  SELECT station_id, observed_at, bikes_available,
+         bikes_available - LAG(bikes_available) OVER (
+           PARTITION BY station_id ORDER BY observed_at) AS delta
+  FROM station_status_snapshots
+  WHERE observed_at &gt; now() - interval '30 minutes'
+)
+SELECT station_id,
+       LAST(bikes_available, observed_at)           AS bikes_now,
+       SUM(delta) FILTER (WHERE delta &lt; 0) / 30.0   AS drain_per_min,
+       LAST(bikes_available, observed_at)
+         / NULLIF(-SUM(delta) FILTER (WHERE delta &lt; 0) / 30.0, 0) AS minutes_to_empty
+FROM recent GROUP BY station_id
+ORDER BY minutes_to_empty NULLS LAST LIMIT 50;</code></pre>
+<p class="small">Window functions, filtered aggregates and a partition-pruned time range in one query. Interviewers ask about exactly these.</p>
+
+<h2 id="coverage">Skill coverage</h2>
+<p>This is the table to keep open while you build. Every skill you listed maps to a specific, demonstrable piece of the system, and each row is something you can put a number on.</p>
+<div class="tablewrap"><table>
+<tr><th>Skill</th><th>Where it lives in Dockwatch</th><th>Proof you can show</th></tr>
+<tr><td class="k">ETL (batch)</td><td>Airflow DAG: download monthly Citi Bike zip → PySpark clean/dedupe/type-cast → Parquet on S3 (MinIO locally) → <code>COPY</code> into Postgres</td><td>DAG graph screenshot, rows/sec, idempotent re-runs</td></tr>
+<tr><td class="k">Data pipeline (streaming)</td><td>Poller publishes GBFS diffs to Kafka keyed by station; consumer upserts snapshots and updates continuous aggregates</td><td>End-to-end lag p95 (feed timestamp → row visible)</td></tr>
+<tr><td class="k">SQL &amp; queries</td><td>Window functions, filtered aggregates, materialised views, <code>EXPLAIN ANALYZE</code> before/after indexes</td><td>A "query optimisation log" in the README with timings</td></tr>
+<tr><td class="k">Database design</td><td>SCD-2 stations table, daily partitioning, BRIN vs B-tree choice, outbox table, FK and check constraints</td><td>ER diagram + migration history (Alembic)</td></tr>
+<tr><td class="k">Warehouse modelling</td><td>dbt: staging → intermediate → marts, with <code>not_null</code>/<code>unique</code>/<code>accepted_values</code> tests and generated docs</td><td>dbt docs site, test pass count</td></tr>
+<tr><td class="k">Load balancing</td><td>Nginx <code>upstream</code> with <code>least_conn</code>, active health checks, three FastAPI replicas; kill one mid-load-test</td><td>Grafana panel showing traffic redistribute with zero 5xx</td></tr>
+<tr><td class="k">Caching</td><td>Redis read-through cache on <code>/stations/risk</code> with 20 s TTL; cache-aside invalidation on new snapshot</td><td>Hit ratio and p95 with/without cache</td></tr>
+<tr><td class="k">Rate limiting</td><td>Token bucket in Redis (Lua script, atomic) per API key; <code>429</code> + <code>Retry-After</code></td><td>k6 run that shows the limit engaging cleanly</td></tr>
+<tr><td class="k">API design</td><td>FastAPI, OpenAPI docs, cursor pagination, idempotency keys on <code>POST /rebalance-tasks</code>, proper status codes</td><td>Swagger UI live; replayed POST returns same 201 body</td></tr>
+<tr><td class="k">Distributed systems</td><td>Outbox pattern, at-least-once consumers with dedupe, exponential backoff on the poller, circuit breaker on Open-Meteo</td><td>Chaos test: stop Kafka for 2 min, prove no loss</td></tr>
+<tr><td class="k">Containers &amp; infra</td><td>Docker Compose for everything locally; Terraform for EC2 + RDS + S3 on AWS free tier; GitHub Actions CI running tests + dbt tests</td><td>One-command <code>make up</code>; green CI badge; Terraform plan output</td></tr>
+<tr><td class="k">Observability</td><td>Prometheus metrics from every service, OpenTelemetry trace across Nginx → API → Postgres, structured JSON logs</td><td>Grafana dashboard screenshot; one trace waterfall</td></tr>
+<tr><td class="k">Testing</td><td>pytest unit + integration (testcontainers for Postgres/Kafka), dbt tests, k6 load tests in CI on a schedule</td><td>Coverage %, load-test report</td></tr>
+<tr><td class="k">AI (bonus)</td><td>Either a gradient-boosted dock-out classifier trained on the marts, or a text-to-SQL "ask the data" endpoint over dbt models with an LLM</td><td>Precision/recall at 30 min horizon, or 10 example questions</td></tr>
+</table></div>
+
+<h2 id="hard">The hard parts, and why they're the point</h2>
+<p><strong>Snapshot volume.</strong> Six million rows a day means that within a week the naive "index on observed_at" approach stops fitting in memory. The correct move is daily range partitions with a BRIN index on <code>observed_at</code> (the data is append-only and time-ordered, so BRIN costs almost nothing) and a retention job that detaches partitions older than 30 days into Parquet. Write down the query time before and after; that's the resume bullet.</p>
+<p><strong>The feed lies a little.</strong> GBFS <code>last_reported</code> timestamps go backwards, stations vanish and reappear, and some systems publish the same payload for minutes at a time. Your poller should diff against the previous payload and only publish changes, which also cuts Kafka volume by roughly 80%. Handling that is your data-quality story.</p>
+<p><strong>Exactly-once is a lie, dedupe is the truth.</strong> Kafka consumers will redeliver. Make the snapshot upsert keyed on <code>(station_id, last_reported)</code> so redelivery is harmless, and the rebalance-task consumer idempotent on the outbox event id. Be ready to explain in an interview why you chose at-least-once plus idempotency over transactional producers.</p>
+<p><strong>The load test has to hurt.</strong> Run k6 at, say, 500 requests per second against <code>/stations/risk</code> with the cache disabled first, watch Postgres saturate, then enable Redis and watch p95 drop from hundreds of milliseconds to single digits. Then kill one API replica during the run. The Grafana screenshot of that sequence is the single most persuasive image in the whole README.</p>
+<div class="callout warn"><p><strong>Scope discipline.</strong> Pick one city (New York has the most stations and the best trip history). Do not add a second city, a mobile app, or user accounts until everything in the coverage table is green. Breadth across cities proves nothing; depth in one proves everything.</p></div>
+
+<h2 id="plan">A six-week plan, part time</h2>
+<p>Each phase ends with something that runs and something written down. If a week slips, cut the AI bonus, never the load test.</p>
+<div class="phase"><div class="when">Week 1</div><div><h4>Skeleton and the live feed</h4><p>Docker Compose with Postgres, Kafka, Redis. Poller for GBFS with diffing and backoff. Consumer writing partitioned snapshots. Alembic migrations. First Grafana panel: rows/min.</p><div class="ship">Ships: live data flowing for 7 days straight, schema diagram.</div></div></div>
+<div class="phase"><div class="when">Week 2</div><div><h4>Batch history and the warehouse</h4><p>Airflow DAG for monthly trip CSVs → PySpark → Parquet (MinIO) → Postgres. dbt project with staging/intermediate/marts and tests. Open-Meteo hourly join.</p><div class="ship">Ships: 3+ months of trips loaded, dbt docs site, a page of EXPLAIN ANALYZE timings.</div></div></div>
+<div class="phase"><div class="when">Week 3</div><div><h4>The API</h4><p>FastAPI: <code>/stations</code>, <code>/stations/{id}/history</code> (cursor pagination), <code>/stations/risk</code>, <code>POST /rebalance-tasks</code> with idempotency keys and the outbox. Redis cache and token-bucket rate limit. pytest with testcontainers.</p><div class="ship">Ships: OpenAPI docs, 80%+ test coverage, replay-safe POST.</div></div></div>
+<div class="phase"><div class="when">Week 4</div><div><h4>Load balancing, load testing, observability</h4><p>Nginx in front of three replicas with health checks. Prometheus + OpenTelemetry across every hop. k6 scenarios: baseline, cache off vs on, kill-a-replica, rate-limit engage.</p><div class="ship">Ships: the Grafana screenshot, a load-test report with five numbers.</div></div></div>
+<div class="phase"><div class="when">Week 5</div><div><h4>Cloud and CI</h4><p>Terraform: EC2 (Compose on it is fine), RDS Postgres, S3. GitHub Actions running pytest, dbt tests and a nightly smoke k6. Public URL for the map and the API.</p><div class="ship">Ships: live URL, green badge, Terraform in the repo.</div></div></div>
+<div class="phase"><div class="when">Week 6</div><div><h4>Prediction, README, write-up</h4><p>Dock-out classifier (LightGBM on mart features: hour, weekday, weather, recent drain) or the text-to-SQL endpoint. README with diagram, numbers, "how to run in one command". A 1,000-word blog post on the hardest problem.</p><div class="ship">Ships: the thing you link on your resume.</div></div></div>
+
+<h2 id="resume">How it reads on the resume</h2>
+<p>Write the bullets from the measurements, not the tool list. Fill in your real numbers; these are the shapes.</p>
+<ul class="bullets">
+<li>Built a real-time bike-share rebalancing platform ingesting ~5.8M station-status events/day from GBFS via Kafka into partitioned PostgreSQL; cut hot-path query time from 2.4 s to 38 ms with BRIN-indexed daily partitions and continuous aggregates.</li>
+<li>Designed an Airflow + PySpark batch pipeline loading 40M+ historical trips into Parquet and Postgres, modelled with dbt (18 models, 61 tests) into marts powering a 30-minute dock-out predictor with 0.81 precision.</li>
+<li>Served predictions through a load-balanced FastAPI tier (Nginx least-conn, 3 replicas) with Redis caching and a Lua token-bucket rate limiter; sustained 500 req/s at p95 &lt; 20 ms and zero 5xx during a replica failure under k6.</li>
+<li>Implemented the transactional outbox and idempotent consumers for at-least-once delivery; verified no data loss across a 2-minute broker outage in an automated chaos test.</li>
+<li>Provisioned on AWS free tier with Terraform (EC2, RDS, S3); GitHub Actions CI runs pytest, dbt tests and nightly load tests; full OpenTelemetry tracing and Grafana dashboards.</li>
+</ul>
+
+<h2 id="alts">Three alternatives, if bikes aren't your thing</h2>
+<p>Each of these has the same shape (a live stream, a big batch, a query-heavy store, a load-balanced API) and the same free, keyless data. Pick one you'd actually enjoy explaining for forty minutes.</p>
+
+<div class="alt"><h3>Editstorm: edit-war detection on Wikipedia</h3><div class="src">source: Wikimedia EventStreams (SSE, recentchange) · ~30–60 events/s, 24/7</div><p>Consume the firehose of every edit across all Wikipedia languages, window it by article, and flag articles where reverts spike (an edit war) or where a brand-new account makes many rapid edits (likely vandalism). Batch side: the full monthly page-view dumps. Strengths: a true always-on stream with real volume, windowed aggregations in Spark Structured Streaming or Flink, and a clear "anomaly detection" story. Weakness: harder to describe the business value in one sentence.</p></div>
+
+<div class="alt"><h3>Lookalike: phishing-domain watcher on certificate transparency</h3><div class="src">source: Certstream (WebSocket) · thousands of new certificates/minute</div><p>Every TLS certificate issued in the world gets logged publicly. Stream them, fuzzy-match new domain names against a list of brands (<code>paypa1-login.com</code>, <code>amaz0n-secure.net</code>), score them, and expose an alerting API. This has the highest raw throughput of the four, which makes the Kafka partitioning, consumer-group scaling and backpressure story real. Great fit if you want to lean toward security or platform roles. Weakness: dedupe and trigram matching in Postgres (<code>pg_trgm</code>, GIN indexes) get hard fast, which is either a bonus or a risk depending on your appetite.</p></div>
+
+<div class="alt"><h3>Aftershock: global seismic monitoring with geospatial queries</h3><div class="src">source: USGS Earthquake API (REST) + EMSC (WebSocket) · plus 50 years of historical catalogue</div><p>Stream new quakes, store them in PostGIS, and serve "what shook within 100 km of this point in the last hour" plus per-region rate baselines to detect swarms. Batch side: the full USGS historical catalogue for baselines. Strengths: PostGIS spatial indexes (GiST) are a distinctive skill, the map is visually striking, and the alerting use-case is obviously useful. Weakness: event rate is bursty and low on quiet days, so your load test has to be synthetic.</p></div>
+
+<h2 id="avoid">What to avoid</h2>
+<p>Don't build it in a notebook; build it as a repo with a <code>Makefile</code> and a Compose file. Don't stop at "it works locally" when a free-tier deploy is a week of work. Don't list technologies you touched for an hour; list the ones you can defend under questioning, and be honest in the README about what's simplified (Compose on a single EC2 instead of Kubernetes is a perfectly good choice for a solo project, and saying so shows judgement). Don't skip the measurements: an interviewer who reads "p95 dropped from 340 ms to 12 ms after adding Redis" will ask you about it, and that conversation is the interview going well.</p>
+<p>One last thing: put the README diagram and the five numbers above the fold. The hiring manager has five to ten minutes. Make the first screen do the work.</p>
+
+<h2 id="sources">Sources</h2>
+<ul class="sources">
+<li><a href="https://www.qarera.com/reports/most-in-demand-skills-2026">Qarera: Most In-Demand Skills of 2026 (360,000+ job postings)</a></li>
+<li><a href="https://dataengineeracademy.com/blog/data-engineer-portfolio-review-checklist-2026-what-hiring-managers-actually-score/">Data Engineer Academy: Portfolio review checklist 2026</a></li>
+<li><a href="https://www.dataexpert.io/blog/data-engineering-portfolio-projects-get-hired">DataExpert: Data engineering portfolio projects that get hired</a></li>
+<li><a href="https://quest2offer.ai/en/skill-roadmap-backend-engineer/">Backend Engineer Skill Roadmap 2026</a></li>
+<li><a href="https://gbfs.org/documentation/reference/">GBFS specification reference (MobilityData)</a></li>
+<li><a href="https://citibikenyc.com/system-data">Citi Bike system data (trip histories + GBFS feed)</a></li>
+<li><a href="https://openskynetwork.github.io/opensky-api/rest.html">OpenSky Network REST API docs</a></li>
+<li><a href="https://wikitech.wikimedia.org/wiki/Event_Platform/EventStreams">Wikimedia EventStreams</a></li>
+<li><a href="https://github.com/conduktor/public-streaming-api">Conduktor: curated list of 70+ free real-time data sources</a></li>
+<li><a href="https://www.finalroundai.com/blog/software-engineering-job-market-2026">Software Engineering Job Market 2026</a></li>
+</ul>
+</main>
+</div>

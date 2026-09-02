@@ -1,0 +1,40 @@
+[project]
+name = "dockwatch"
+version = "0.1.0"
+description = "Real-time bike-share rebalancing platform"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "sqlalchemy>=2.0",
+    "alembic>=1.13",
+    "psycopg[binary]>=3.1",
+    "redis>=5.0",
+    "confluent-kafka>=2.4",
+    "httpx>=0.27",
+    "pydantic-settings>=2.3",
+    "apache-airflow>=2.9; extra == 'airflow'",
+    "pyspark>=3.5; extra == 'spark'",
+    "dbt-postgres>=1.8; extra == 'dbt'",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2",
+    "pytest-asyncio>=0.23",
+    "testcontainers>=4.7",
+    "ruff>=0.5",
+    "mypy>=1.10",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
