@@ -1,4 +1,4 @@
-.PHONY: up down logs lint test fmt migrate batch-run dbt-run dbt-test
+.PHONY: up down logs lint test fmt migrate batch-run dbt-run dbt-test stations-backfill
 
 up:
 	docker compose up -d
@@ -37,3 +37,7 @@ dbt-run:
 
 dbt-test:
 	cd dbt && dbt test --profiles-dir .
+
+# SCD-2 backfill of the stations table from GBFS station_information.json.
+stations-backfill:
+	python -m dockwatch.poller.backfill_stations
