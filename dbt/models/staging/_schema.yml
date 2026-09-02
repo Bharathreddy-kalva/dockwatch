@@ -1,0 +1,43 @@
+version: 2
+
+models:
+  - name: stg_trips
+    columns:
+      - name: ride_id
+        tests:
+          - unique
+          - not_null
+      - name: started_at
+        tests:
+          - not_null
+      - name: ended_at
+        tests:
+          - not_null
+      - name: rideable_type
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["classic_bike", "electric_bike"]
+      - name: member_casual
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["member", "casual"]
+
+  - name: stg_station_status_snapshots
+    columns:
+      - name: station_id
+        tests:
+          - not_null
+      - name: observed_at
+        tests:
+          - not_null
+
+  - name: stg_weather_hourly
+    columns:
+      - name: observed_at
+        tests:
+          - unique
+          - not_null

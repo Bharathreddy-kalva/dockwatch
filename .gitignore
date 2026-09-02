@@ -224,3 +224,8 @@ __marimo__/
 *.parquet
 data/
 docker-compose.override.yml
+
+# dbt
+dbt/logs/
+dbt/dbt_packages/
+dbt/.user.yml

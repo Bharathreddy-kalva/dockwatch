@@ -1,0 +1,16 @@
+# Committed (not ~/.dbt/profiles.yml) since local dev credentials here match
+# the docker-compose Postgres (dockwatch/dockwatch) and aren't secret — still
+# routed through env_var() with those as defaults so a real deployment can
+# override them without editing this file.
+dockwatch:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('DOCKWATCH_DB_HOST', 'localhost') }}"
+      port: "{{ env_var('DOCKWATCH_DB_PORT', '5432') | as_number }}"
+      user: "{{ env_var('DOCKWATCH_DB_USER', 'dockwatch') }}"
+      password: "{{ env_var('DOCKWATCH_DB_PASSWORD', 'dockwatch') }}"
+      dbname: "{{ env_var('DOCKWATCH_DB_NAME', 'dockwatch') }}"
+      schema: public
+      threads: 4
