@@ -1,4 +1,4 @@
-.PHONY: up down logs lint test fmt migrate
+.PHONY: up down logs lint test fmt migrate batch-run dbt-run dbt-test
 
 up:
 	docker compose up -d
@@ -26,3 +26,14 @@ fmt:
 
 test:
 	pytest -v
+
+# Runs the Phase 2 batch pipeline (download -> PySpark clean -> Parquet ->
+# Postgres -> weather backfill) for one month, e.g. `make batch-run YEAR=2025 MONTH=2`.
+batch-run:
+	python -m dockwatch.batch.run_month --year $(YEAR) --month $(MONTH)
+
+dbt-run:
+	cd dbt && dbt run --profiles-dir .
+
+dbt-test:
+	cd dbt && dbt test --profiles-dir .

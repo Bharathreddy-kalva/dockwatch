@@ -14,9 +14,6 @@ dependencies = [
     "httpx>=0.27",
     "pydantic-settings>=2.3",
     "prometheus-client>=0.20",
-    "apache-airflow>=2.9; extra == 'airflow'",
-    "pyspark>=3.5; extra == 'spark'",
-    "dbt-postgres>=1.8; extra == 'dbt'",
 ]
 
 [project.optional-dependencies]
@@ -27,13 +24,39 @@ dev = [
     "ruff>=0.5",
     "mypy>=1.10",
 ]
+# PySpark clean/cast/dedupe + the Parquet/MinIO/Postgres loader (Phase 2:
+# batch/warehouse). Previously these were declared inline in `dependencies`
+# with `; extra == "..."` markers, which don't actually gate anything
+# without a matching self-referential extra — they were silently never
+# installed. Split into real optional-dependency groups instead.
+batch = [
+    "pyspark>=3.5",
+    # <3.0: PySpark doesn't fully support pandas 3.x yet, and pandas 3.x
+    # needs a newer fsspec than the s3fs/aiobotocore/botocore chain below
+    # (pinned to avoid boto3's notorious pip-resolver backtracking) provides.
+    "pandas>=2.2,<3.0",
+    "pyarrow>=16",
+    "boto3==1.34.162",
+    "s3fs==2024.9.0",
+]
+airflow = [
+    "apache-airflow>=2.9",
+]
+dbt = [
+    "dbt-postgres>=1.8",
+]
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
 
 [tool.mypy]
-python_version = "3.11"
+# Matches the actual dev interpreter (3.12), not the 3.11 floor in
+# requires-python: numpy's bundled stubs (pulled in by pandas, for the
+# Phase 2 batch pipeline) use PEP 695 `type` statement syntax that mypy
+# only parses under python_version >= "3.12", even though our own code
+# doesn't use any 3.12-only syntax.
+python_version = "3.12"
 ignore_missing_imports = true
 
 [build-system]

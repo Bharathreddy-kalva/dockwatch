@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: station_hourly_demand
+    columns:
+      - name: station_id
+        tests:
+          - not_null
+      - name: hour
+        tests:
+          - not_null
+      - name: departures
+        tests:
+          - not_null
+      - name: arrivals
+        tests:
+          - not_null

@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: dockwatch
+    schema: public
+    tables:
+      - name: trips
+      - name: station_status_snapshots
+      - name: weather_hourly
