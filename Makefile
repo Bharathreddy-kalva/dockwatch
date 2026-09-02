@@ -1,4 +1,4 @@
-.PHONY: up down logs lint test fmt migrate batch-run dbt-run dbt-test stations-backfill
+.PHONY: up down logs lint test fmt migrate batch-run dbt-run dbt-test stations-backfill outbox-relay
 
 up:
 	docker compose up -d
@@ -41,3 +41,7 @@ dbt-test:
 # SCD-2 backfill of the stations table from GBFS station_information.json.
 stations-backfill:
 	python -m dockwatch.poller.backfill_stations
+
+# Polls the outbox table and publishes unpublished rows to Kafka.
+outbox-relay:
+	python -m dockwatch.outbox.relay
