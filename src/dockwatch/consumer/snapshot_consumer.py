@@ -99,9 +99,11 @@ def run(consumer: Consumer, conn: psycopg.Connection) -> None:
             if msg.error():
                 logger.error("consumer error: %s", msg.error())
             else:
-                station = json.loads(msg.value())
-                rows.append(station_to_row(station))
-                messages.append(msg)
+                value = msg.value()
+                if value is not None:
+                    station = json.loads(value)
+                    rows.append(station_to_row(station))
+                    messages.append(msg)
 
         due = rows and (
             len(rows) >= BATCH_SIZE or time.monotonic() - last_flush >= BATCH_TIMEOUT_SECONDS
