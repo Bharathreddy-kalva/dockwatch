@@ -10,9 +10,16 @@ Core, for the write-heavy paths).
 Idempotent via delete-then-reload rather than upsert: trips has no natural
 per-row conflict target the way station_status_snapshots does (a redelivered
 Kafka message always carries the same key; a re-run of this DAG for the same
-month is instead re-deriving the whole month from scratch). Deleting the
-month's date range before loading means a re-run always converges on exactly
-one copy of the month, however many times it's retried.
+month is instead re-deriving the whole month from scratch). The delete is
+keyed on ride_id, not on a started_at date range: Citi Bike's monthly files
+aren't strictly bounded to the calendar month (Feb 2025's file, for example,
+has ~48k trips — 2.4% — starting before Feb 1 or after Feb 28), so a
+date-range delete misses exactly those boundary rows on a re-run, and the
+subsequent COPY then collides with itself on the trips_pkey (ride_id)
+constraint. Deleting by the incoming batch's own ride_ids has no such gap:
+whatever rows this load is about to (re)insert are exactly the rows it
+deletes first, so a re-run always converges on exactly one copy of the
+month regardless of how its data straddles month boundaries.
 """
 
 from __future__ import annotations
@@ -57,31 +64,29 @@ def _storage_options() -> dict:
     }
 
 
-def _month_bounds(year: int, month: int) -> tuple[str, str]:
-    start = f"{year:04d}-{month:02d}-01"
-    next_year, next_month = (year, month + 1) if month < 12 else (year + 1, 1)
-    end = f"{next_year:04d}-{next_month:02d}-01"
-    return start, end
-
-
 def load_month(year: int, month: int) -> int:
     path = f"s3://{settings.s3_bucket}/trips/year={year:04d}/month={month:02d}/"
     df = pd.read_parquet(path, storage_options=_storage_options())[COLUMNS]
-
-    month_start, month_end = _month_bounds(year, month)
 
     buffer = io.StringIO()
     df.to_csv(buffer, index=False, header=False)
     buffer.seek(0)
 
+    columns_sql = ", ".join(COLUMNS)
+
     with _connect_db() as conn, conn.cursor() as cur:
-        cur.execute(
-            "DELETE FROM trips WHERE started_at >= %s AND started_at < %s",
-            (month_start, month_end),
-        )
-        deleted = cur.rowcount
-        with cur.copy(f"COPY trips ({', '.join(COLUMNS)}) FROM STDIN WITH (FORMAT csv)") as copy:
+        # Staged in a temp table rather than deleted-by-ride_id via a huge
+        # parameter list: COPY into staging, then a set-based DELETE/INSERT
+        # joined on ride_id lets Postgres do the matching, and it's a single
+        # data transfer instead of building a multi-million-element array.
+        cur.execute("CREATE TEMP TABLE trips_staging (LIKE trips INCLUDING DEFAULTS) ON COMMIT DROP")
+        with cur.copy(f"COPY trips_staging ({columns_sql}) FROM STDIN WITH (FORMAT csv)") as copy:
             copy.write(buffer.read())
+
+        cur.execute("DELETE FROM trips USING trips_staging WHERE trips.ride_id = trips_staging.ride_id")
+        deleted = cur.rowcount
+
+        cur.execute(f"INSERT INTO trips ({columns_sql}) SELECT {columns_sql} FROM trips_staging")
         conn.commit()
 
     logger.info(
