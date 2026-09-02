@@ -13,6 +13,7 @@ dependencies = [
     "confluent-kafka>=2.4",
     "httpx>=0.27",
     "pydantic-settings>=2.3",
+    "prometheus-client>=0.20",
     "apache-airflow>=2.9; extra == 'airflow'",
     "pyspark>=3.5; extra == 'spark'",
     "dbt-postgres>=1.8; extra == 'dbt'",

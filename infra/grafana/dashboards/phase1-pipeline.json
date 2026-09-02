@@ -1,0 +1,64 @@
+{
+  "uid": "dockwatch-phase1",
+  "title": "Dockwatch — Phase 1 Pipeline",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "timezone": "browser",
+  "time": { "from": "now-30m", "to": "now" },
+  "refresh": "5s",
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Snapshot rows written / min",
+      "description": "rate(dockwatch_snapshot_rows_written_total[1m]) * 60 — proves the poller -> Kafka -> consumer -> Postgres pipeline is live.",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 9, "w": 18, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "rate(dockwatch_snapshot_rows_written_total[1m]) * 60",
+          "legendFormat": "rows/min",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": { "drawStyle": "line", "fillOpacity": 15, "spanNulls": true }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Consumer metrics endpoint up",
+      "description": "up{job=\"dockwatch-consumer\"} — 1 while the consumer process is running and scrapeable.",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 9, "w": 6, "x": 18, "y": 0 },
+      "targets": [
+        {
+          "expr": "up{job=\"dockwatch-consumer\"}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" } } },
+            { "type": "value", "options": { "1": { "text": "UP", "color": "green" } } }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    }
+  ]
+}
