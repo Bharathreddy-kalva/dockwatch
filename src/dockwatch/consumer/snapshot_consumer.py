@@ -18,6 +18,7 @@ from typing import Any
 
 import psycopg
 from confluent_kafka import Consumer, Message
+from prometheus_client import Counter, start_http_server
 
 from dockwatch.common.config import settings
 
@@ -27,6 +28,16 @@ KAFKA_TOPIC = "station.status"
 CONSUMER_GROUP = "snapshot-writer"
 BATCH_SIZE = 100
 BATCH_TIMEOUT_SECONDS = 5.0
+METRICS_PORT = 9101
+
+# Counts rows the consumer has upserted, i.e. successfully committed to
+# Postgres — including ones ON CONFLICT DO NOTHING later no-ops on, since
+# that's still a write the consumer performed. This is the rows/min number
+# behind the Grafana panel proving the pipeline is live end-to-end.
+ROWS_WRITTEN = Counter(
+    "dockwatch_snapshot_rows_written_total",
+    "Rows upserted into station_status_snapshots by the consumer",
+)
 
 UPSERT_SQL = """
     INSERT INTO station_status_snapshots (
@@ -86,6 +97,7 @@ def write_batch(conn: psycopg.Connection, rows: list[dict[str, Any]]) -> None:
     with conn.cursor() as cur:
         cur.executemany(UPSERT_SQL, rows)
     conn.commit()
+    ROWS_WRITTEN.inc(len(rows))
 
 
 def run(consumer: Consumer, conn: psycopg.Connection) -> None:
@@ -122,6 +134,7 @@ def run(consumer: Consumer, conn: psycopg.Connection) -> None:
 
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+    start_http_server(METRICS_PORT)
     consumer = build_consumer()
     try:
         with connect_db() as conn:
